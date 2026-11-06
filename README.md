@@ -1,9 +1,6 @@
 # CAN-Based Vehicle Monitoring and Reverse Safety System
 
-![Protocol](https://img.shields.io/badge/Protocol-CAN-blue)
-![Microcontroller](https://img.shields.io/badge/MCU-LPC2129-orange)
-![Language](https://img.shields.io/badge/Language-Embedded%20C-red)
-![IDE](https://img.shields.io/badge/IDE-Keil%20µVision-brightgreen)
+![Protocol](https://img.shields.io/badge/Protocol-CAN-blue) ![Microcontroller](https://img.shields.io/badge/MCU-LPC2129-orange) ![Language](https://img.shields.io/badge/Language-Embedded%20C-red) ![IDE](https://img.shields.io/badge/IDE-Keil%20%C2%B5Vision-brightgreen)
 
 A three-node embedded systems prototype demonstrating vehicle-status monitoring and driver alerts using the Controller Area Network (CAN) protocol. The system combines engine-temperature measurement, interrupt-driven indicator requests, forward/reverse mode selection, and ultrasonic reverse-obstacle detection.
 
@@ -53,41 +50,41 @@ The project uses three LPC2129 microcontroller nodes connected to a shared CAN b
 
 The block diagram gives the high-level view of the three-node system and the shared CAN bus.
 
-![CAN-Based Vehicle Monitoring System — block diagram](images/BLOCKDIAGRAM_major.jpeg)
+[![CAN-Based Vehicle Monitoring System — block diagram](images/BLOCKDIAGRAM_major.jpeg)](images/BLOCKDIAGRAM_major.jpeg)
 
 ### Hardware interface and physical CAN bus
 
 The physical bus uses a differential pair: CANH and CANL. Each LPC2129's on-chip CAN controller communicates through a CAN transceiver such as the MCP2551. The two ends of the bus should be terminated; intermediate nodes should not each receive their own 120 Ω termination.
 
-![Physical CAN bus and node interfaces](images/interface.png)
+[![Physical CAN bus and node interfaces](images/interface.png)](images/interface.png)
 
 ### Firmware workflow and integration plan
 
 The following workflow illustration summarizes a staged development approach: verify the LCD, bring up DS18B20 1-Wire communication, validate interrupt/LCD behavior, test ultrasonic range calculation, test CAN loopback/communication, then integrate the three node images. Treat this as a development plan, not proof that every stage has passed.
 
-![Development and integration workflow](images/sequential.png)
+[![Development and integration workflow](images/sequential.png)](images/sequential.png)
 
 ### Reverse-alert node concept
 
 The Reverse Alert Node measures the ultrasonic Echo pulse, calculates a distance, compares it with the configured threshold, and reports distance/alert status to the Main Node over CAN.
 
-![Reverse-alert node concept](images/reverse.png)
+[![Reverse-alert node concept](images/reverse.png)](images/reverse.png)
 
 ### Indicator-node concept
 
 The Indicator Node receives the command frame and maps the command payload to the eight-LED animation.
 
-![Indicator-node concept](images/indicator.png)
+[![Indicator-node concept](images/indicator.png)](images/indicator.png)
 
 ### Main-node software flow
 
 The Main Node initializes peripherals, continuously updates local monitoring tasks, processes pending switch events, transmits commands, and checks received CAN status.
 
-![Main-node software flow](images/master.png)
+[![Main-node software flow](images/master.png)](images/master.png)
 
 > **Diagram accuracy note:** These illustrations are explanatory visuals. Where an illustration's labels differ from the source code or hardware (for example, HC-SR04 versus an HC-SR05-compatible module, or the controller model text), use the actual board markings, datasheets, pin configuration, and compiled firmware as the authority. The diagrams do not independently verify wiring or successful tests.
 
-```text
+```
              Left / Right / Mode switches
                          |
                          v
@@ -162,18 +159,18 @@ If the Echo signal never arrives, the ultrasonic driver uses a timeout to avoid 
 
 ### Hardware
 
-| Component | Quantity / use | Purpose |
-|---|---|---|
-| LPC2129 | 3 | Main, Indicator, and Reverse Alert nodes |
-| MCP2551 or compatible CAN transceiver | One per node | Physical interface between CAN controller and CANH/CANL bus |
-| DS18B20 | 1 | Digital temperature measurement on the Main Node |
-| HC-SR05-compatible ultrasonic module | 1 | Reverse obstacle distance measurement |
-| Character LCD | 1 | Displays Main Node status and temperature |
-| LEDs | 8 on Indicator Node, plus warning LED(s) if fitted | Indicator animation and warning output |
-| Buzzer | 1 | Audible reverse warning on Main Node |
-| Switches | 3 | Mode, left indicator, and right indicator inputs |
-| USB-to-UART adapter / programmer | As required by board | Programming, serial output, or debugging depending on the board setup |
-| CAN wiring and termination resistors | As required | Shared CANH/CANL bus connection |
+| Component                             | Quantity / use                                     | Purpose                                                               |
+|---------------------------------------|----------------------------------------------------|-----------------------------------------------------------------------|
+| LPC2129                               | 3                                                  | Main, Indicator, and Reverse Alert nodes                              |
+| MCP2551 or compatible CAN transceiver | One per node                                       | Physical interface between CAN controller and CANH/CANL bus           |
+| DS18B20                               | 1                                                  | Digital temperature measurement on the Main Node                      |
+| HC-SR05-compatible ultrasonic module  | 1                                                  | Reverse obstacle distance measurement                                 |
+| Character LCD                         | 1                                                  | Displays Main Node status and temperature                             |
+| LEDs                                  | 8 on Indicator Node, plus warning LED(s) if fitted | Indicator animation and warning output                                |
+| Buzzer                                | 1                                                  | Audible reverse warning on Main Node                                  |
+| Switches                              | 3                                                  | Mode, left indicator, and right indicator inputs                      |
+| USB-to-UART adapter / programmer      | As required by board                               | Programming, serial output, or debugging depending on the board setup |
+| CAN wiring and termination resistors  | As required                                        | Shared CANH/CANL bus connection                                       |
 
 ### Software and tools
 
@@ -188,43 +185,43 @@ The following map is derived from the GPIO and peripheral definitions in the sup
 
 ### Main Node — LPC2129
 
-| Function | LPC2129 pin / signal | Direction | Notes |
-|---|---|---|---|
-| LCD data D0–D7 | `P0.8`–`P0.15` | Output | 8-bit LCD data bus |
-| LCD RS | `P0.16` | Output | Selects command (`0`) or character data (`1`) |
-| LCD EN | `P0.17` | Output | Enable strobe for LCD writes |
-| LCD RW | `P0.18` | Output | Write mode when low; read mode when high. Tie low in hardware if the design never reads the LCD and the driver supports that wiring. |
-| DS18B20 DQ | `P0.19` | Bidirectional GPIO | 1-Wire data line; requires a suitable pull-up resistor |
-| Buzzer control | `P0.20` | Output | Source initializes the output low and uses low as the active state; confirm driver polarity and transistor/buzzer circuit |
-| Mode switch | `P0.1` / `EINT0` | Input / external interrupt | Falling-edge interrupt; toggles forward/reverse mode |
-| Left indicator switch | `P0.3` / `EINT1` | Input / external interrupt | Falling-edge interrupt |
-| Right indicator switch | `P0.7` / `EINT2` | Input / external interrupt | Falling-edge interrupt |
-| CAN1 RX | `P0.25` / `RD1` | Peripheral input | CAN receive signal from the transceiver's RXD output |
-| CAN1 TX | `P0.24` / `TD1` | Peripheral output | Expected CAN1 transmit pin; verify PINSEL setup in the actual driver and device datasheet |
+| Function               | LPC2129 pin / signal | Direction                  | Notes                                                                                                                                |
+|------------------------|----------------------|----------------------------|--------------------------------------------------------------------------------------------------------------------------------------|
+| LCD data D0–D7         | `P0.8`–`P0.15`       | Output                     | 8-bit LCD data bus                                                                                                                   |
+| LCD RS                 | `P0.16`              | Output                     | Selects command (`0`) or character data (`1`)                                                                                        |
+| LCD EN                 | `P0.17`              | Output                     | Enable strobe for LCD writes                                                                                                         |
+| LCD RW                 | `P0.18`              | Output                     | Write mode when low; read mode when high. Tie low in hardware if the design never reads the LCD and the driver supports that wiring. |
+| DS18B20 DQ             | `P0.19`              | Bidirectional GPIO         | 1-Wire data line; requires a suitable pull-up resistor                                                                               |
+| Buzzer control         | `P0.20`              | Output                     | Source initializes the output low and uses low as the active state; confirm driver polarity and transistor/buzzer circuit            |
+| Mode switch            | `P0.1` / `EINT0`     | Input / external interrupt | Falling-edge interrupt; toggles forward/reverse mode                                                                                 |
+| Left indicator switch  | `P0.3` / `EINT1`     | Input / external interrupt | Falling-edge interrupt                                                                                                               |
+| Right indicator switch | `P0.7` / `EINT2`     | Input / external interrupt | Falling-edge interrupt                                                                                                               |
+| CAN1 RX                | `P0.25` / `RD1`      | Peripheral input           | CAN receive signal from the transceiver's RXD output                                                                                 |
+| CAN1 TX                | `P0.24` / `TD1`      | Peripheral output          | Expected CAN1 transmit pin; verify PINSEL setup in the actual driver and device datasheet                                            |
 
 ### Indicator Node — LPC2129
 
-| Function | LPC2129 pin / signal | Direction | Notes |
-|---|---|---|---|
-| Indicator LED 0 | `P0.0` | Output | Active-low according to the source logic |
-| Indicator LED 1 | `P0.1` | Output | Active-low according to the source logic |
-| Indicator LED 2 | `P0.2` | Output | Active-low according to the source logic |
-| Indicator LED 3 | `P0.3` | Output | Active-low according to the source logic |
-| Indicator LED 4 | `P0.4` | Output | Active-low according to the source logic |
-| Indicator LED 5 | `P0.5` | Output | Active-low according to the source logic |
-| Indicator LED 6 | `P0.6` | Output | Active-low according to the source logic |
-| Indicator LED 7 | `P0.7` | Output | Active-low according to the source logic |
-| CAN1 RX | `P0.25` / `RD1` | Peripheral input | Connect through the CAN transceiver |
-| CAN1 TX | `P0.24` / `TD1` | Peripheral output | Verify peripheral pin selection in the compiled driver |
+| Function        | LPC2129 pin / signal | Direction         | Notes                                                  |
+|-----------------|----------------------|-------------------|--------------------------------------------------------|
+| Indicator LED 0 | `P0.0`               | Output            | Active-low according to the source logic               |
+| Indicator LED 1 | `P0.1`               | Output            | Active-low according to the source logic               |
+| Indicator LED 2 | `P0.2`               | Output            | Active-low according to the source logic               |
+| Indicator LED 3 | `P0.3`               | Output            | Active-low according to the source logic               |
+| Indicator LED 4 | `P0.4`               | Output            | Active-low according to the source logic               |
+| Indicator LED 5 | `P0.5`               | Output            | Active-low according to the source logic               |
+| Indicator LED 6 | `P0.6`               | Output            | Active-low according to the source logic               |
+| Indicator LED 7 | `P0.7`               | Output            | Active-low according to the source logic               |
+| CAN1 RX         | `P0.25` / `RD1`      | Peripheral input  | Connect through the CAN transceiver                    |
+| CAN1 TX         | `P0.24` / `TD1`      | Peripheral output | Verify peripheral pin selection in the compiled driver |
 
 ### Reverse Alert Node — LPC2129
 
-| Function | LPC2129 pin / signal | Direction | Notes |
-|---|---|---|---|
-| Ultrasonic Trigger | `P0.20` | Output | Sends the trigger pulse to the sensor |
-| Ultrasonic Echo | `P0.19` | Input | Measures the returned Echo pulse width |
-| CAN1 RX | `P0.25` / `RD1` | Peripheral input | Receives mode messages and other CAN traffic |
-| CAN1 TX | `P0.24` / `TD1` | Peripheral output | Transmits distance/alert messages through the transceiver |
+| Function           | LPC2129 pin / signal | Direction         | Notes                                                     |
+|--------------------|----------------------|-------------------|-----------------------------------------------------------|
+| Ultrasonic Trigger | `P0.20`              | Output            | Sends the trigger pulse to the sensor                     |
+| Ultrasonic Echo    | `P0.19`              | Input             | Measures the returned Echo pulse width                    |
+| CAN1 RX            | `P0.25` / `RD1`      | Peripheral input  | Receives mode messages and other CAN traffic              |
+| CAN1 TX            | `P0.24` / `TD1`      | Peripheral output | Transmits distance/alert messages through the transceiver |
 
 ### CAN transceiver and bus wiring
 
@@ -281,11 +278,11 @@ An ultrasonic module estimates distance by emitting a short ultrasonic burst and
 
 The source uses the following CAN identifiers and payload fields:
 
-| CAN ID | Sender → receiver | `Data1` | `Data2` | Purpose |
-|---|---|---|---|---|
-| `0x101` | Main Node → Indicator Node | ASCII `'L'`, `'R'`, or `'S'` | Not used by application | Left, right, or indicators off |
-| `0x102` | Main Node → Reverse Alert Node | `0` = forward, `1` = reverse | Not used by application | Reports current vehicle mode |
-| `0x201` | Reverse Alert Node → Main Node | Measured distance in cm | `0` = no alert, `1` = obstacle inside threshold | Reverse distance and alert status |
+| CAN ID  | Sender → receiver              | `Data1`                      | `Data2`                                         | Purpose                           |
+|---------|--------------------------------|------------------------------|-------------------------------------------------|-----------------------------------|
+| `0x101` | Main Node → Indicator Node     | ASCII `'L'`, `'R'`, or `'S'` | Not used by application                         | Left, right, or indicators off    |
+| `0x102` | Main Node → Reverse Alert Node | `0` = forward, `1` = reverse | Not used by application                         | Reports current vehicle mode      |
+| `0x201` | Reverse Alert Node → Main Node | Measured distance in cm      | `0` = no alert, `1` = obstacle inside threshold | Reverse distance and alert status |
 
 The CAN driver is configured for **125 kbit/s** in `Common/can_defines.h`. All nodes on the bus must use matching bit timing and a compatible CAN physical layer. `Data1` and `Data2` are byte-sized CAN payload fields in this project; ensure distance values fit in one byte and that the receiver interprets them consistently.
 
@@ -294,34 +291,35 @@ The CAN driver is configured for **125 kbit/s** in `Common/can_defines.h`. All n
 This section describes the intended application-level sequence based on the documented source behavior. Exact timing depends on the implementation and clock/timer configuration.
 
 1. **Power-on initialization**
+
    - Configure the system clock and GPIO pin functions.
    - Initialize the LCD and local outputs.
    - Configure the CAN controller for the project's configured bit rate (125 kbit/s).
    - Configure the Main Node's external-interrupt inputs.
    - Initialize the sensor interfaces used by that node.
-
 2. **Main Node monitoring loop**
+
    - Request a DS18B20 temperature conversion and read the sensor result.
    - Convert the raw sensor value to a displayable temperature.
    - Refresh the LCD status without unnecessarily clearing/repainting the entire display.
    - Process any left, right, or mode-switch event recorded by an interrupt.
    - Transmit the appropriate CAN command when an application state changes.
    - Check received reverse-alert frames and update the local warning output when appropriate.
-
 3. **Indicator Node**
+
    - Receive CAN frames.
    - Ignore frames that do not use indicator command ID `0x101`.
    - Interpret the command byte as `L`, `R`, or `S`.
    - Run the matching LED sequence or turn the LEDs off.
-
 4. **Reverse Alert Node**
+
    - Receive mode updates using ID `0x102`.
    - When reverse mode is active, obtain ultrasonic distance readings.
    - Average three readings as implemented in the source.
    - Compare the averaged result with the configured 20 cm threshold.
    - Send ID `0x201` containing the distance and alert flag.
-
 5. **Main Node alert response**
+
    - Accept the reverse-alert frame.
    - Check that the vehicle is in reverse and that the alert field indicates an obstacle inside the threshold.
    - Activate the warning output according to the source's buzzer polarity and driver circuit.
@@ -334,11 +332,11 @@ Keep interrupt service routines short. An ISR should acknowledge/record the even
 
 The three identifiers form a small application protocol:
 
-| Message ID | Meaning | Typical trigger | Receiver action |
-|---|---|---|---|
-| `0x101` | Indicator command | Left/right switch event or stop command | Indicator Node updates the LED pattern |
-| `0x102` | Forward/reverse state | Mode switch changes state | Reverse Alert Node enables/disables reverse measurements |
-| `0x201` | Reverse distance and alert state | Reverse Node completes a measurement cycle | Main Node updates its reverse-warning decision |
+| Message ID | Meaning                          | Typical trigger                            | Receiver action                                          |
+|------------|----------------------------------|--------------------------------------------|----------------------------------------------------------|
+| `0x101`    | Indicator command                | Left/right switch event or stop command    | Indicator Node updates the LED pattern                   |
+| `0x102`    | Forward/reverse state            | Mode switch changes state                  | Reverse Alert Node enables/disables reverse measurements |
+| `0x201`    | Reverse distance and alert state | Reverse Node completes a measurement cycle | Main Node updates its reverse-warning decision           |
 
 **Payload interpretation matters.** In this project, the documented `Data1`/`Data2` fields are byte-sized. `Data1` in frame `0x201` is the distance in centimetres, while `Data2` is the alert flag. A byte can represent only 0–255, so the protocol needs an explicit convention for invalid measurements, timeouts, and stale data if it is extended. Do not interpret a timeout or missing frame as a measured zero-centimetre distance.
 
@@ -362,7 +360,7 @@ For a report or portfolio, add real photographs of the assembled circuit, serial
 
 ## Repository Layout
 
-```text
+```
 CAN-Based-Vehicle-Monitoring-System/
 ├── README.md
 ├── Common/
@@ -417,37 +415,37 @@ This section contains photographs of the physical prototype. The diagrams earlie
 
 The LCD displays the project title during startup.
 
-![LCD startup screen showing the project title](images/output-title-screen.jpeg)
+[![LCD startup screen showing the project title](images/output-title-screen.jpeg)](images/output-title-screen.jpeg)
 
 ### 2. Complete hardware setup
 
 The prototype uses multiple LPC2129 development boards connected with jumper wires. The main-node LCD and the ultrasonic sensor are visible in the assembled setup.
 
-![Complete hardware prototype](images/output-hardware-setup.jpeg)
+[![Complete hardware prototype](images/output-hardware-setup.jpeg)](images/output-hardware-setup.jpeg)
 
 ### 3. Forward driving mode
 
 The LCD shows the temperature reading, indicator status, and forward-mode state in this captured demonstration.
 
-![Forward driving mode displayed on the LCD](images/output-forward-mode.jpeg)
+[![Forward driving mode displayed on the LCD](images/output-forward-mode.jpeg)](images/output-forward-mode.jpeg)
 
 ### 4. Reverse mode and obstacle alert
 
 The LCD shows reverse mode and a distance/alert status in this captured demonstration. The exact threshold behavior should be documented using separate measurements at known distances.
 
-![Reverse mode and distance alert output](images/output-reverse-alert.jpeg)
+[![Reverse mode and distance alert output](images/output-reverse-alert.jpeg)](images/output-reverse-alert.jpeg)
 
 ### 5. Left-indicator demonstration
 
 This photograph records the hardware while the left-indicator input/state is being demonstrated.
 
-![Left-indicator demonstration](images/output-left-indicator.jpeg)
+[![Left-indicator demonstration](images/output-left-indicator.jpeg)](images/output-left-indicator.jpeg)
 
 ### 6. Right-indicator demonstration
 
 This photograph records the hardware while the right-indicator input/state is being demonstrated.
 
-![Right-indicator demonstration](images/output-right-indicator.jpeg)
+[![Right-indicator demonstration](images/output-right-indicator.jpeg)](images/output-right-indicator.jpeg)
 
 ### Output observations
 
