@@ -1,1 +1,8 @@
-![Project Hardware](images/BLOCKDIAGRAM_major.jpeg.jpg)
+
+![System Architecture](images/system_architecture.png)
+
+![CAN Bus Connection](images/can_bus_connection.png)
+
+![Reverse Node Flowchart](images/reverse_node_flow.png)
+
+![CAN Message Flow](images/can_message_flow.png)
