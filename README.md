@@ -50,37 +50,37 @@ The project uses three LPC2129 microcontroller nodes connected to a shared CAN b
 
 The block diagram gives the high-level view of the three-node system and the shared CAN bus.
 
-[![CAN-Based Vehicle Monitoring System — block diagram](images/BLOCKDIAGRAM_major.jpeg)](images/BLOCKDIAGRAM_major.jpeg)
+[![CAN-Based Vehicle Monitoring System — block diagram](BLOCKDIAGRAM_major.jpeg)](BLOCKDIAGRAM_major.jpeg)
 
 ### Hardware interface and physical CAN bus
 
 The physical bus uses a differential pair: CANH and CANL. Each LPC2129's on-chip CAN controller communicates through a CAN transceiver such as the MCP2551. The two ends of the bus should be terminated; intermediate nodes should not each receive their own 120 Ω termination.
 
-[![Physical CAN bus and node interfaces](images/interface.png)](images/interface.png)
+[![Physical CAN bus and node interfaces](interface.png)](interface.png)
 
 ### Firmware workflow and integration plan
 
 The following workflow illustration summarizes a staged development approach: verify the LCD, bring up DS18B20 1-Wire communication, validate interrupt/LCD behavior, test ultrasonic range calculation, test CAN loopback/communication, then integrate the three node images. Treat this as a development plan, not proof that every stage has passed.
 
-[![Development and integration workflow](images/sequential.png)](images/sequential.png)
+[![Development and integration workflow](sequential.png)](sequential.png)
 
 ### Reverse-alert node concept
 
 The Reverse Alert Node measures the ultrasonic Echo pulse, calculates a distance, compares it with the configured threshold, and reports distance/alert status to the Main Node over CAN.
 
-[![Reverse-alert node concept](images/reverse.png)](images/reverse.png)
+[![Reverse-alert node concept](reverse.png)](reverse.png)
 
 ### Indicator-node concept
 
 The Indicator Node receives the command frame and maps the command payload to the eight-LED animation.
 
-[![Indicator-node concept](images/indicator.png)](images/indicator.png)
+[![Indicator-node concept](indicator.png)](indicator.png)
 
 ### Main-node software flow
 
 The Main Node initializes peripherals, continuously updates local monitoring tasks, processes pending switch events, transmits commands, and checks received CAN status.
 
-[![Main-node software flow](images/master.png)](images/master.png)
+[![Main-node software flow](master.png)](master.png)
 
 > **Diagram accuracy note:** These illustrations are explanatory visuals. Where an illustration's labels differ from the source code or hardware (for example, HC-SR04 versus an HC-SR05-compatible module, or the controller model text), use the actual board markings, datasheets, pin configuration, and compiled firmware as the authority. The diagrams do not independently verify wiring or successful tests.
 
@@ -415,37 +415,37 @@ This section contains photographs of the physical prototype. The diagrams earlie
 
 The LCD displays the project title during startup.
 
-[![LCD startup screen showing the project title](images/output-title-screen.jpeg)](images/output-title-screen.jpeg)
+[![LCD startup screen showing the project title](output-title-screen.jpeg)](output-title-screen.jpeg)
 
 ### 2. Complete hardware setup
 
 The prototype uses multiple LPC2129 development boards connected with jumper wires. The main-node LCD and the ultrasonic sensor are visible in the assembled setup.
 
-[![Complete hardware prototype](images/output-hardware-setup.jpeg)](images/output-hardware-setup.jpeg)
+[![Complete hardware prototype](output-hardware-setup.jpeg)](output-hardware-setup.jpeg)
 
 ### 3. Forward driving mode
 
 The LCD shows the temperature reading, indicator status, and forward-mode state in this captured demonstration.
 
-[![Forward driving mode displayed on the LCD](images/output-forward-mode.jpeg)](images/output-forward-mode.jpeg)
+[![Forward driving mode displayed on the LCD](output-forward-mode.jpeg)](output-forward-mode.jpeg)
 
 ### 4. Reverse mode and obstacle alert
 
 The LCD shows reverse mode and a distance/alert status in this captured demonstration. The exact threshold behavior should be documented using separate measurements at known distances.
 
-[![Reverse mode and distance alert output](images/output-reverse-alert.jpeg)](images/output-reverse-alert.jpeg)
+[![Reverse mode and distance alert output](output-reverse-alert.jpeg)](output-reverse-alert.jpeg)
 
 ### 5. Left-indicator demonstration
 
 This photograph records the hardware while the left-indicator input/state is being demonstrated.
 
-[![Left-indicator demonstration](images/output-left-indicator.jpeg)](images/output-left-indicator.jpeg)
+[![Left-indicator demonstration](output-left-indicator.jpeg)](output-left-indicator.jpeg)
 
 ### 6. Right-indicator demonstration
 
 This photograph records the hardware while the right-indicator input/state is being demonstrated.
 
-[![Right-indicator demonstration](images/output-right-indicator.jpeg)](images/output-right-indicator.jpeg)
+[![Right-indicator demonstration](output-right-indicator.jpeg)](output-right-indicator.jpeg)
 
 ### Output observations
 
